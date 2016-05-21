@@ -1,0 +1,20 @@
+#PBS -N collect_primary
+#PBS -q biocluster-6
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=30:00:00:00
+#PBS -l mem=8gb
+#PBS -k oe
+#PBS -m abe
+
+module unload R
+module load R
+
+cd ~/data/data/stream_dat
+
+
+#loop for 30 days, every hour
+#generic script to farm tweets that reference specific keywords
+for i in {1..720}; do
+    Rscript collect_primary.R
+    echo $i
+done

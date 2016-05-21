@@ -1,0 +1,16 @@
+tweet_bespoke/
+bespoke_log.txt
+temp/
+input/
+gen_twitter_secrets.R
+twitter-secrets.Rdata
+echo_archive/
+*.RData
+*.rdata
+.RData
+.Rhistory
+output/
+weird_file/
+oauth_files/
+tcot_tweets.json
+.httr-oauth

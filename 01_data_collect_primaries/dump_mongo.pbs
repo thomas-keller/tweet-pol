@@ -1,0 +1,19 @@
+#PBS -N mongo3
+#PBS -q bioforce-6
+#PBS -l nodes=1:ppn=2
+#PBS -l walltime=12:00:00
+#PBS -l mem=8gb
+#PBS -k oe
+#PBS -m abe
+
+module unload R
+module load R
+
+cd ~/data/data/stream_dat
+
+mongod --dbpath ~/data/data/stream_dat/tweet_db > mongo_log.txt &
+
+Rscript dump_mongo_clust.R
+
+mongod --shutdown
+
