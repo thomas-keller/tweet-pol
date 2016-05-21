@@ -9,6 +9,7 @@ echo_archive/
 *.rdata
 .RData
 .Rhistory
+ex.txt
 output/
 weird_file/
 oauth_files/
