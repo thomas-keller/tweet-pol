@@ -1,19 +1,21 @@
 #==============================================================================
 # 13-heatmaps.r
-# Purpose: produce Figure 2 in paper
-# Author: Pablo Barbera
+# Purpose: produce heatmaps (retweets) of Ahmed Mohammed and Primary debate discussions (#Istandwithmohammed, #hilary, #Donaldtrump, etc.)
+# Original Author: Pablo Barbera
+# Modified for these topics : Thomas Keller
 #==============================================================================
 
 # setup
 library(reshape)
-load("output/estimates.rdata")
+wd <-getwd()
+if(wd!="/home/thomas/tweet-pol") setwd("tweet-pol")
+load("./output/estimates.rdata")
 estimates <- estimates[,c("id", "ideology")]
 
 ## list abbreviations and names
-lists <- c("minimum_wage", "obama", "superbowl", "marriageequality", "budget",
-  "newtown", "governmentshutdown", "oscars", "sotu", "syria",
-  "olympics", "boston")
-
+dsets<-c('ahmed','repub_primary','dem_primary')
+lists <- c("ahmed","democrats","republicans")
+dsets.labels<-c("Ahmed Mohammed","Early Republican Primary",'Early Democratic Primary')
 not.poli <- c("superbowl", "newtown", "oscars", "syria", "olympics", "boston")
 not.poli.labels <- c("Super Bowl", "Newtown Shooting", "Oscars 2014", "Syria",
     "Winter Olympics", "Boston Marathon")
@@ -44,9 +46,9 @@ expand_data <- function(breaks=0.10, min=-4, max=4){
 
 pol.days <- c() ## we also estimate our polarization index by day
 
-for (j in 1:length(not.poli)){
+for (j in 1:length(dsets)){
     
-    lst <- not.poli[j]
+    lst <- dsets[j]
     cat(lst, "\n")
     fls <- list.files("temp/retweets", full.names=TRUE)
     fls <- fls[grep(lst, fls)]  
@@ -67,43 +69,7 @@ for (j in 1:length(not.poli)){
         results[[i]] <- retweets
         cat(i, " ")
         pol.days <- rbind(pol.days,
-            data.frame(collection = not.poli.labels[j], day = i, 
-                polar = mean(abs(retweets$ideology_retweeted)),
-            stringsAsFactors=F))
-    }   
-
-    results <- do.call(rbind, results)  
-
-    ## saving results
-    save(results, file=paste0("temp/retweets_ideology/rt_results_", lst, '.rdata'))
-
-}
-
-
-for (j in 1:length(poli)){
-    
-    lst <- not.poli[j]
-    cat(lst, "\n")
-    fls <- list.files("temp/retweets", full.names=TRUE)
-    fls <- fls[grep(lst, fls)]  
-
-    results <- list()   
-
-    for (i in 1:length(fls)){
-        retweets <- read.table(fls[i], sep=",", 
-        	stringsAsFactors=F, col.names=c("retweeter", "retweeted"), fill=T)
-        names(retweets)[1] <- 'id'
-        retweets <- merge(retweets, estimates)
-        names(retweets)[1] <- "retweeter"
-        names(retweets)[3] <- "ideology_retweeter"
-        names(retweets)[2] <- 'id'
-        retweets <- merge(retweets, estimates)
-        names(retweets)[4] <- "ideology_retweeted"
-        names(retweets)[1] <- "retweeted"
-        results[[i]] <- retweets
-        cat(i, " ")
-        pol.days <- rbind(pol.days,
-            data.frame(collection = not.poli.labels[j], day = i, 
+            data.frame(collection = dsets.labels[j], day = i, 
                 polar = mean(abs(retweets$ideology_retweeted)),
             stringsAsFactors=F))
     }   
@@ -118,17 +84,17 @@ for (j in 1:length(poli)){
 save(pol.days, file="temp/polarization-by-day.rdata")
 
 ######################################################################
-### FIGURE 2(a): political topics
+### FIGURE 2: dsets
 ######################################################################
 
-xy.poli <- c()
+xy.dsets <- c()
 
-for (j in 1:length(poli)){
+for (j in 1:length(dsets)){
 
     cat(j, " ")
 
     ## loading retweet data
-    lst <- poli[j]
+    lst <- dsets[j]
     cat(lst, " ")
     load(paste0("temp/retweets_ideology/rt_results_", lst, '.rdata'))
 
@@ -137,68 +103,27 @@ for (j in 1:length(poli)){
 
     ## summarizing
     new.xy <- expand_data(breaks=0.25)
-    new.xy$candidate <- poli.labels[j]
-    xy.poli <- rbind(xy.poli, new.xy)
+    new.xy$candidate <- dsets.labels[j]
+    xy.dsets <- rbind(xy.dsets, new.xy)
 }
 
 library(scales)
 library(ggplot2)
 
-p <- ggplot(xy.poli, aes(x=y, y=x))
+p <- ggplot(xy.dsets, aes(x=y, y=x))
 pq <- p + geom_tile(aes(fill=prop), colour="white") + 
         scale_fill_gradient(name="% of\ntweets", 
         low = "white", high = "black", 
-        breaks=c(0, .0050, 0.010, 0.015, 0.02), limits=c(0, .021),
-        labels=c("0.0%", "0.5%", "1.0%", "1.5%", ">2%")) +
+        breaks=c(0, .0025, 0.005, 0.0075, 0.01, 0.012), limits=c(0, .0122),
+        labels=c("0.0%", "0.25%", "0.5%", "0.75%","1.0%", ">1%")) +
         labs(y="Estimated Ideology of Retweeter", x="Estimated Ideology of Author") + 
-        scale_y_continuous(expand=c(0,0), breaks=(-2:2), limits=c(-3, 3)) +
-        scale_x_continuous(expand=c(0,0), breaks=(-2:2), limits=c(-3, 3)) +
+        scale_y_continuous(expand=c(0,0), breaks=(-2:2), limits=c(-3.5, 3.5)) +
+        scale_x_continuous(expand=c(0,0), breaks=(-2:2), limits=c(-3.5, 3.5)) +
         facet_wrap( ~ candidate, nrow=2) + 
         theme(panel.border=element_rect(fill=NA), panel.background = element_blank()) +
         coord_equal() 
 pq
 
-ggsave(filename="plots/figure2a.pdf", plot=pq, height=5, width=8)
+ggsave(filename="04_plots/figure2.pdf", plot=pq, height=5, width=8)
 
 
-######################################################################
-### FIGURE 2(b): non-political topics
-######################################################################
-
-xy <- c()
-
-for (j in 1:length(not.poli)){
-
-    cat(j, " ")
-
-    ## loading retweet data
-    lst <- not.poli[j]
-    cat(lst, " ")
-    load(paste0("temp/retweets_ideology/rt_results_", lst, '.rdata'))
-
-    names(results) <- c("retweeted", "retweeter",
-        "ideology_retweeter", "ideology_retweeted")
-
-    ## summarizing
-    new.xy <- expand_data(breaks=0.25)
-    new.xy$candidate <- not.poli.labels[j]
-    xy <- rbind(xy, new.xy)
-
-}
-
-
-p <- ggplot(xy, aes(x=y, y=x))
-pq <- p + geom_tile(aes(fill=prop), colour="white") + 
-        scale_fill_gradient(name="% of\ntweets", 
-        low = "white", high = "black", 
-        breaks=c(0, .0050, 0.010, 0.015, 0.02), limits=c(0, .021),
-        labels=c("0.0%", "0.5%", "1.0%", "1.5%", ">2%")) +
-        labs(y="Estimated Ideology of Retweeter", x="Estimated Ideology of Author") + 
-        scale_y_continuous(expand=c(0,0), breaks=(-2:2), limits=c(-3, 3)) +
-        scale_x_continuous(expand=c(0,0), breaks=(-2:2), limits=c(-3, 3)) +
-        facet_wrap( ~ candidate, nrow=2) + 
-        theme(panel.border=element_rect(fill=NA), panel.background = element_blank()) +
-        coord_equal()
-pq
-
-ggsave(filename="plots/figure2b.pdf", plot=pq, height=5, width=8)

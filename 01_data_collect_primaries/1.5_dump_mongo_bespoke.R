@@ -26,19 +26,19 @@ dump_tweets<-function(files,ns,logfile){
 files<-list.files(pattern='ahmed_2015.*json')[1:172]
 dump_tweets(files,'bespoke.ahmed','ahmed_processed_apr.txt')
 
-#first and second US democratic debates
-files<-list.files(pattern='dem.*json')[c(1:38,325:354)]
-dump_tweets(files,'bespoke.dem_primary','dem_processed_apr.txt')
-
-#first republican debate
-list.files(pattern='republican_primary_2015_09_.*json')[30:85]
-dump_tweets(files,'bespoke.repub_primary','primary_processed_apr.txt')
-
 #second republican debate
-list.files(pattern='republican_primary_2015_10_.*json')[718:772]
+list.files(pattern='republican_primary_2015_10_.*json')[716:772]
 dump_tweets(files,'bespoke.repub_primary','primary_processed_apr.txt')
 
 #third republican debate
-list.files(pattern='republican_primary_2015_11_.*json')[215:269]
+list.files(pattern='republican_primary_2015_11_.*json')[213:269]
 dump_tweets(files,'bespoke.repub_primary','primary_processed_apr.txt')
 
+
+#first republican debate
+list.files(pattern='republican_primary_2015_09_.*json')[28:83]
+dump_tweets(files,'bespoke.repub_primary','primary_processed_apr.txt')
+
+#first and second US democratic debates
+files<-list.files(pattern='dem.*json')[c(1:38,323:353)]
+dump_tweets(files,'bespoke.dem_primary','dem_processed_apr.txt')

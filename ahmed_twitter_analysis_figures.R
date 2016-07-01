@@ -226,3 +226,14 @@ df$created_at<-formatTwDate(df$created_at)
 p<-ggplot(df,aes(x=created_at))+geom_histogram(binwidth=3600)+scale_x_datetime()
 p<-p+ylab('Hourly Tweets regarding Ahmed Mohammed')+xlab('Date')
 print(p)
+
+tweets<-extract.tweets2(bs,set)
+df <- tweetsToDF(tweets) ## transforming to data frame
+head(df)
+df$created_at<-formatTwDate(df$created_at)
+
+#first attempt at making a nice plot
+#N=947391
+p<-ggplot(df,aes(x=created_at))+geom_histogram(binwidth=3600)+scale_x_datetime()
+p<-p+ylab('Hourly Tweets regarding Ahmed Mohammed')+xlab('Date')
+print(p)
